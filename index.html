@@ -3,8 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Magic Traducteur – Instantané</title>
-    <meta name="description" content="Traducteur instantané pour conversation téléphonique ou en personne. Parlez, nous traduisons et nous parlons pour vous.">
+    <title>Magic Ear — Outils de traduction en temps réel</title>
+    <meta name="description" content="Magic Ear — Outils de traduction en temps réel. Parlez, nous traduisons et nous parlons pour vous, en conversation téléphonique ou en personne.">
+    <meta name="theme-color" content="#0B0F1A">
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta property="og:title" content="Magic Ear — Outils de traduction en temps réel">
+    <meta property="og:description" content="Parlez, nous traduisons et nous parlons pour vous. Conversation téléphonique ou en personne.">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://magicjolab-star.github.io/magic-traducteur/magic-ear-hero.jpg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -30,9 +38,32 @@
             border-bottom: 1px solid rgba(212, 175, 55, 0.2);
             background: linear-gradient(180deg, #161B28 0%, #0B0F1A 100%);
         }
+        /* Visuel Magic Ear en haut de page : fond noir fusionne avec la page, aucun contour, aucune bordure */
+        .hero-img {
+            height: 230px;
+            width: auto;
+            max-width: 90vw;
+            display: block;
+            margin: 0 auto 8px;
+            mix-blend-mode: screen;
+        }
         h1 { color: var(--gold); font-size: 1.5rem; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; }
         .tagline { font-size: 0.8rem; color: var(--cyan); }
         .steps { font-size: 0.8rem; color: var(--text-muted); margin-top: 10px; line-height: 1.5; }
+        .header-actions {
+            display: flex; gap: 10px; justify-content: center; align-items: center;
+            flex-wrap: wrap; margin-top: 14px;
+        }
+        .install-btn {
+            background: transparent; border: 1px solid var(--gold); color: var(--gold);
+            border-radius: 999px; padding: 10px 18px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+        }
+        .install-btn:active { background: var(--gold); color: #000; }
+        .apropos-link { color: var(--cyan); font-size: 0.9rem; font-weight: 600; text-decoration: none; padding: 10px 6px; }
+        .install-help {
+            font-size: 0.8rem; color: var(--text-muted); line-height: 1.5;
+            max-width: 420px; margin: 10px auto 0;
+        }
         .container { flex: 1; width: 100%; max-width: 600px; margin: 0 auto; padding: 20px; }
         .language-controls {
             display: flex; align-items: center; justify-content: space-between;
@@ -113,6 +144,12 @@
             background: rgba(255, 255, 255, 0.05); padding: 12px; border-radius: 10px;
             margin-bottom: 8px; font-size: 0.9rem; border-left: 3px solid var(--gold); cursor: pointer; line-height: 1.5;
         }
+        .apropos-section { margin-top: 30px; }
+        .apropos-section h2 {
+            color: var(--gold); font-size: 0.9rem; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 12px;
+        }
+        /* Panneau A propos : propre, coins arrondis, aucune bordure, aucune ombre */
+        .apropos-section img { width: 100%; height: auto; display: block; border-radius: 16px; }
         footer {
             position: fixed; bottom: 0; left: 0; right: 0;
             background: rgba(11, 15, 26, 0.95); backdrop-filter: blur(10px);
@@ -120,18 +157,49 @@
         }
         .footer-content { display: flex; flex-direction: column; align-items: center; gap: 8px; }
         .mention { font-size: 12px; color: var(--text-muted); letter-spacing: 1px; }
+        /* Intro video plein ecran */
+        .intro-overlay {
+            position: fixed; inset: 0; z-index: 1000; background: #05070D;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .intro-overlay.hidden { display: none; }
+        .intro-overlay video { width: 100%; height: 100%; object-fit: contain; }
+        .intro-skip {
+            position: absolute; bottom: 28px; right: 20px; z-index: 1001;
+            background: var(--gold); color: #000; border: none; border-radius: 999px;
+            padding: 12px 20px; font-size: 1rem; font-weight: 700; cursor: pointer;
+        }
+        .intro-sound {
+            position: absolute; bottom: 28px; left: 20px; z-index: 1001;
+            background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(212,175,55,0.5);
+            border-radius: 999px; padding: 12px 16px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+        }
         @media (max-width: 400px) {
             h1 { font-size: 1.2rem; }
             .translated-text { font-size: 1.2rem; }
+            .hero-img { height: 190px; }
         }
     </style>
 </head>
 <body>
 
+    <!-- Intro video Magic App Production, avec option Passer -->
+    <div id="introOverlay" class="intro-overlay">
+        <video id="introVideo" src="intro.mp4" autoplay muted playsinline preload="auto"></video>
+        <button id="introSound" class="intro-sound" type="button">🔇 Son</button>
+        <button id="introSkip" class="intro-skip" type="button">Passer l'intro →</button>
+    </div>
+
     <header>
-        <h1>Magic Traducteur</h1>
-        <p class="tagline">Parlez, nous traduisons instantanément</p>
+        <img class="hero-img" src="magic-ear-hero.jpg" alt="Magic Ear — Traduction en temps réel">
+        <h1>Magic Ear</h1>
+        <p class="tagline">Outils de traduction en temps réel</p>
         <p class="steps">1. Choisissez les langues &nbsp;·&nbsp; 2. Appuyez sur le micro &nbsp;·&nbsp; 3. Parlez</p>
+        <div class="header-actions">
+            <button id="installBtn" class="install-btn" type="button">⬇ Installer l'application</button>
+            <a class="apropos-link" href="#apropos">À propos ↓</a>
+        </div>
+        <p id="installHelp" class="install-help" hidden>Sur iPhone : touchez Partager, puis « Sur l'écran d'accueil ». Sur Android : menu ⋮ → « Installer l'application » ou « Ajouter à l'écran d'accueil ».</p>
     </header>
 
     <div class="container">
@@ -225,6 +293,12 @@
             </div>
             <ul class="history-list" id="historyList"></ul>
         </div>
+
+        <!-- Section A propos -->
+        <section class="apropos-section" id="apropos">
+            <h2>À propos</h2>
+            <img src="apropos.jpg" alt="Jonathan Labelle, fondateur de Magic App Production">
+        </section>
     </div>
 
     <footer>
@@ -235,6 +309,65 @@
     </footer>
 
     <script>
+        // ---------- Intro video : Passer, Son, fin automatique, securite 12 s ----------
+        (function () {
+            const overlay = document.getElementById('introOverlay');
+            const video = document.getElementById('introVideo');
+            const skipBtn = document.getElementById('introSkip');
+            const soundBtn = document.getElementById('introSound');
+            let hidden = false;
+            function hideIntro() {
+                if (hidden) return;
+                hidden = true;
+                overlay.classList.add('hidden');
+                try { video.pause(); } catch (_) {}
+            }
+            skipBtn.addEventListener('click', hideIntro);
+            video.addEventListener('ended', hideIntro);
+            video.addEventListener('error', hideIntro);
+            soundBtn.addEventListener('click', () => {
+                video.muted = !video.muted;
+                if (!video.muted) { video.play().catch(() => {}); }
+                soundBtn.textContent = video.muted ? '🔇 Son' : '🔊 Son';
+            });
+            setTimeout(hideIntro, 12000);
+        })();
+
+        // ---------- Installation PWA ----------
+        (function () {
+            const installBtn = document.getElementById('installBtn');
+            const installHelp = document.getElementById('installHelp');
+            let deferredPrompt = null;
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                installBtn.style.display = 'none';
+                return;
+            }
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+            window.addEventListener('appinstalled', () => { installBtn.style.display = 'none'; });
+            installBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    try {
+                        const choice = await deferredPrompt.userChoice;
+                        if (choice.outcome === 'accepted') installBtn.style.display = 'none';
+                    } catch (_) {}
+                    deferredPrompt = null;
+                } else {
+                    installHelp.hidden = !installHelp.hidden;
+                }
+            });
+        })();
+
+        // ---------- Service worker (PWA installable + fonctionnement hors ligne) ----------
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            });
+        }
+
         // ---------- Éléments ----------
         const micBtn = document.getElementById('micBtn');
         const btnLabel = document.getElementById('btnLabel');
